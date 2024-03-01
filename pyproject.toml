@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "ml-spaceship"
+version = "0.1.0"
+description = ""
+authors = ["Yuriy Eliseev <yurij.eliseev.2004@mail.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fire = "^0.5.0"
+numpy = "^1.26.4"
+catboost = "^1.2.3"
+pandas = "^2.2.1"
+optuna = "^3.5.0"
+scikit-learn = "^1.4.1.post1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
