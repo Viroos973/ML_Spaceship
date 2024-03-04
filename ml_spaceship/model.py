@@ -30,7 +30,7 @@ def divisionFeatures(df):
         df['PassengerGroup'] = df['PassengerId'].apply( lambda x: x.split('_')[0]).astype(int)
 
         #Делим кабину на признаки: палуба, номер и сторона
-        df['Cabin'].fillna('nann/-1/nann', inplace=True)
+        df['Cabin'] = df['Cabin'].fillna('nann/-1/nann')
 
         df['Cabin_deck'] = df['Cabin'].apply( lambda x: x.split('/')[0])
         df['Cabin_num'] = df['Cabin'].apply( lambda x: x.split('/')[1]).astype(int)
@@ -41,10 +41,10 @@ def divisionFeatures(df):
         df['Cabin_side'] = df['Cabin_side'].replace('nann', np.nan)
 
         logging.info("Dividing the Cabin and PassengerId attributes into subfeatures was successful")
+
+        return df
     except Exception:
         logging.error("Something went wrong when dividing features into sub-features", exc_info=True)
-    
-    return df
     
 def fillnaAndDrop(df):
     """
@@ -56,11 +56,11 @@ def fillnaAndDrop(df):
 
         #Заполняем категориальные признаки их модой
         for features in categorical_features:
-            df[features].fillna(df[features].mode().iloc[0], inplace=True)
+            df[features] = df[features].fillna(df[features].mode().iloc[0])
 
         #Заполняем численные признаки их медианой
         for features in regression_features:
-            df[features].fillna(df[features].median(), inplace=True)
+            df[features] = df[features].fillna(df[features].median())
 
         #Переводим булевые признаки в числовые признаки
         for features in bool_features:
@@ -77,10 +77,10 @@ def fillnaAndDrop(df):
         df[spending_features] = spending_imputer.fit_transform(df[spending_features])
 
         logging.info("Filling in the gaps and removing unnecessary features was successful")
+
+        return df
     except Exception:
         logging.error("Something went wrong while filling in the blanks and deleting unnecessary features.", exc_info=True)
-    
-    return df
     
 def encode_cat(df):
     """
@@ -105,10 +105,10 @@ def encode_cat(df):
         df = df.drop(columns='Cabin_side_S')
 
         logging.info("Coding of categorical features was successful")
+
+        return df
     except Exception:
         logging.error("Something went wrong while encoding categorical features", exc_info=True)
-
-    return df
 
 def kfold(X, y, k=5):
     """
@@ -142,10 +142,10 @@ def kfold(X, y, k=5):
             result.append(((X_trains[i], y_trains[i]), (X_vals[i], y_vals[i])))
 
         logging.info("K-Fold splitting of the dataset was successful")
+
+        return result
     except Exception:
         logging.error("Something went wrong during K-Fold splitting the dataset", exc_info=True)
-
-    return result
 
 class My_Classifier_Model(object):
     def __init__(self, dataset):
@@ -176,7 +176,7 @@ class My_Classifier_Model(object):
             }
 
             #Создаем модель CatBoost с заданными параметрами
-            model = cb.CatBoostClassifier(**param)
+            model = cb.CatBoostClassifier(**param, silent=True)
             accs = []
 
             #Обучаем модели, для каждой вычисляем точность и записавыем их в массив accs
@@ -186,14 +186,15 @@ class My_Classifier_Model(object):
                 pred = pred == 'True'
                 accs.append(np.mean(pred == y_val))
 
+
             #Вычисляем среднюю точность модели и возвращаем ее
             acc_mean = np.mean(accs)
 
-            logging.info("Optimization of model parameters was successful")
+            logging.info("Optimization of model parameters was successful {}".format(acc_mean))
+
+            return acc_mean
         except Exception:
             logging.error("Something went wrong while optimizing model parameters", exc_info=True)
-
-        return acc_mean
 
     def train(self):
         """
@@ -220,7 +221,7 @@ class My_Classifier_Model(object):
             study.optimize(self.optune_optimize, n_trials=10)
 
             #Обучаем модель с лучшими параметрами
-            model = cb.CatBoostClassifier(**study.best_params)
+            model = cb.CatBoostClassifier(**study.best_params, silent=True)
             model.fit(self.X_train, self.y_train)
 
             #Сохраняем получившуюся модель
