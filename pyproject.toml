@@ -13,6 +13,7 @@ catboost = "1.2.2"
 pandas = "2.2.0"
 optuna = "3.5.0"
 scikit-learn = "1.2.2"
+flask = "2.0.2"
 
 
 [build-system]
