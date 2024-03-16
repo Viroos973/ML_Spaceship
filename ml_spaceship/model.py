@@ -9,6 +9,7 @@ import logging
 from sklearn.impute import KNNImputer
 
 #Настраиваем систему логирования в файл
+os.makedirs('./data/', exist_ok=True)
 logging.basicConfig(level=logging.INFO, filename="./data/log_file.log", filemode="w", format="%(asctime)s %(levelname)s %(message)s")
 
 # Определение списков признаков
